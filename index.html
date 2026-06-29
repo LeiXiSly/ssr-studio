@@ -1,0 +1,1196 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SSR Studio - 交互数媒作品创作咨询</title><link rel="icon" type="image/jpeg" href="assets/images/logo.jpg"><link rel="apple-touch-icon" href="assets/images/logo.jpg">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black:   #0d0d0d;
+      --white:   #ffffff;
+      --ink:     #1a1a1a;
+      --soft:    #f5f3ef;
+      --mid:     #e8e4de;
+      --accent:  #c8a46e;
+      --accent2: #4a7c6e;
+      --accent3: #2e3a5c;
+      --purple:  #6b5fa6;
+      --purple-soft: #f0edf8;
+      --text:    #2c2c2c;
+      --light:   #7a7a7a;
+      --serif:   'Georgia', 'Times New Roman', serif;
+      --sans:    'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--sans);
+      color: var(--text);
+      background: var(--white);
+      line-height: 1.8;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container { max-width: 900px; margin: 0 auto; padding: 0 40px; }
+
+    /* ===== Cover ===== */
+    #cover {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #1a1428 0%, #2e3a5c 50%, #1a1428 100%);
+      color: var(--white);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    #cover::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 70% 60% at 30% 20%, rgba(107,95,166,.25) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 50% at 75% 75%, rgba(200,164,110,.15) 0%, transparent 60%);
+    }
+    .cover-eyebrow {
+      font-size: 11px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 28px;
+      position: relative;
+    }
+    .cover-title {
+      font-family: var(--serif);
+      font-size: clamp(56px, 10vw, 100px);
+      font-weight: 400;
+      letter-spacing: 8px;
+      line-height: 1;
+      margin-bottom: 4px;
+      position: relative;
+    }
+    .cover-subtitle {
+      font-size: clamp(14px, 2vw, 18px);
+      letter-spacing: 4px;
+      color: rgba(255,255,255,.5);
+      margin-bottom: 12px;
+      position: relative;
+    }
+    .cover-tagline {
+      max-width: 500px;
+      font-size: 15px;
+      line-height: 2;
+      color: rgba(255,255,255,.7);
+      margin-bottom: 52px;
+      position: relative;
+    }
+    .cover-tagline strong {
+      color: var(--white);
+      font-weight: 500;
+    }
+    .cover-badges {
+      display: flex;
+      gap: 16px;
+      position: relative;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .cover-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid rgba(200,164,110,.4);
+      padding: 9px 22px;
+      font-size: 13px;
+      letter-spacing: .5px;
+      color: var(--accent);
+    }
+    .cover-badge.secondary {
+      border-color: rgba(255,255,255,.15);
+      color: rgba(255,255,255,.55);
+    }
+    .scroll-hint {
+      position: absolute;
+      bottom: 36px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: rgba(255,255,255,.3);
+      font-size: 10px;
+      letter-spacing: 3px;
+    }
+    .scroll-hint .line {
+      width: 1px;
+      height: 40px;
+      background: linear-gradient(to bottom, rgba(255,255,255,.3), transparent);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:.3;} 50%{opacity:.8;} }
+
+    /* ===== Nav ===== */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255,255,255,.96);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--mid);
+    }
+    .nav-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .nav-logo {
+      font-family: var(--serif);
+      font-size: 18px;
+      font-weight: 400;
+      letter-spacing: 2px;
+      color: var(--ink);
+      text-decoration: none;
+    }
+    .nav-links { display: flex; gap: 28px; }
+    .nav-links a {
+      font-size: 13px;
+      color: var(--light);
+      text-decoration: none;
+      letter-spacing: .5px;
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--ink); }
+
+    /* ===== Section Base ===== */
+    section { padding: 96px 0; }
+    section:nth-child(odd) { background: var(--white); }
+    section:nth-child(even) { background: var(--soft); }
+
+    .section-label {
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .section-label::after {
+      content: '';
+      flex: 1;
+      max-width: 48px;
+      height: 1px;
+      background: var(--accent);
+      opacity: .4;
+    }
+    h2 {
+      font-family: var(--serif);
+      font-size: clamp(28px, 4vw, 40px);
+      font-weight: 400;
+      line-height: 1.2;
+      color: var(--ink);
+      margin-bottom: 16px;
+    }
+    .lead {
+      font-size: 17px;
+      color: var(--light);
+      line-height: 1.9;
+      margin-bottom: 40px;
+      max-width: 640px;
+    }
+    .divider {
+      width: 48px;
+      height: 2px;
+      background: var(--accent);
+      margin: 24px 0 40px;
+      opacity: .6;
+    }
+
+    /* ===== About ===== */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 3fr 2fr;
+      gap: 56px;
+      align-items: start;
+      margin-top: 48px;
+    }
+    .about-text p { font-size: 15px; line-height: 2; color: var(--text); margin-bottom: 20px; }
+
+    .highlight-box {
+      background: var(--purple-soft);
+      border-left: 3px solid var(--purple);
+      padding: 24px 28px;
+      margin: 28px 0;
+    }
+    .highlight-box p {
+      font-size: 15px;
+      color: var(--ink);
+      line-height: 1.8;
+      margin: 0;
+    }
+    .highlight-box p strong { color: var(--purple); }
+
+    .core-points { margin-top: 32px; }
+    .core-point {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .point-icon {
+      width: 34px;
+      height: 34px;
+      min-width: 34px;
+      border-radius: 50%;
+      background: var(--purple);
+      color: var(--white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      margin-top: 2px;
+    }
+    .point-text h4 { font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+    .point-text p { font-size: 13px; color: var(--light); line-height: 1.7; margin: 0; }
+
+    .info-block {
+      background: var(--ink);
+      color: var(--white);
+      padding: 36px 32px;
+    }
+    .info-block .row {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .info-item .num {
+      font-family: var(--serif);
+      font-size: 40px;
+      color: var(--accent);
+      line-height: 1;
+    }
+    .info-item .lbl { font-size: 12px; color: rgba(255,255,255,.5); margin-top: 4px; }
+    .info-item .tag {
+      display: inline-block;
+      border: 1px solid rgba(107,95,166,.5);
+      color: #a89ddf;
+      font-size: 12px;
+      padding: 4px 12px;
+      letter-spacing: 1px;
+      margin-top: 4px;
+    }
+
+    /* ===== Knowledge System ===== */
+    #knowledge { background: var(--soft) !important; }
+
+    .knowledge-intro {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      margin-top: 48px;
+      align-items: start;
+    }
+    .knowledge-desc h3 {
+      font-family: var(--serif);
+      font-size: 24px;
+      font-weight: 400;
+      color: var(--ink);
+      margin-bottom: 16px;
+      line-height: 1.3;
+    }
+    .knowledge-desc p {
+      font-size: 14px;
+      color: var(--text);
+      line-height: 1.9;
+      margin-bottom: 16px;
+    }
+    .kb-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--purple);
+      color: var(--white);
+      font-size: 11px;
+      padding: 4px 14px;
+      letter-spacing: 1px;
+      margin-bottom: 24px;
+    }
+
+    .knowledge-pillars {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .kb-pillar {
+      background: var(--white);
+      border: 1px solid var(--mid);
+      padding: 22px 24px;
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      transition: box-shadow .2s;
+    }
+    .kb-pillar:hover { box-shadow: 0 6px 24px rgba(0,0,0,.06); }
+    .kb-num {
+      font-family: var(--serif);
+      font-size: 32px;
+      color: var(--mid);
+      line-height: 1;
+      min-width: 36px;
+    }
+    .kb-content h4 { font-size: 15px; font-weight: 600; color: var(--ink); margin-bottom: 5px; }
+    .kb-content p { font-size: 13px; color: var(--light); line-height: 1.6; margin: 0; }
+
+    .knowledge-framework {
+      margin-top: 56px;
+      padding-top: 48px;
+      border-top: 1px solid var(--mid);
+    }
+    .knowledge-framework h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 28px;
+      letter-spacing: .5px;
+    }
+    .framework-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .fw-card {
+      background: var(--white);
+      border: 1px solid var(--mid);
+      padding: 24px 22px;
+    }
+    .fw-card .fw-icon {
+      font-size: 22px;
+      margin-bottom: 12px;
+    }
+    .fw-card h4 { font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 8px; }
+    .fw-card p { font-size: 12px; color: var(--light); line-height: 1.7; margin: 0; }
+    .fw-card ul { list-style: none; margin-top: 12px; }
+    .fw-card ul li {
+      font-size: 12px;
+      color: var(--text);
+      padding: 3px 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .fw-card ul li::before { content: '·'; color: var(--purple); font-size: 16px; }
+
+    /* ===== What We Do ===== */
+    .what-we-do {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      margin-top: 48px;
+    }
+    .wwd-card {
+      padding: 36px 32px;
+      border: 1px solid var(--mid);
+      background: var(--white);
+      position: relative;
+    }
+    .wwd-card.dark {
+      background: var(--ink);
+      border-color: var(--ink);
+      color: var(--white);
+    }
+    .wwd-label {
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+    .wwd-card h3 {
+      font-family: var(--serif);
+      font-size: 22px;
+      font-weight: 400;
+      color: var(--ink);
+      margin-bottom: 14px;
+      line-height: 1.3;
+    }
+    .wwd-card.dark h3 { color: var(--white); }
+    .wwd-card p {
+      font-size: 14px;
+      color: var(--light);
+      line-height: 1.8;
+      margin-bottom: 20px;
+    }
+    .wwd-card.dark p { color: rgba(255,255,255,.6); }
+    .wwd-list {
+      list-style: none;
+      border-top: 1px solid var(--mid);
+      padding-top: 16px;
+    }
+    .wwd-card.dark .wwd-list { border-color: rgba(255,255,255,.1); }
+    .wwd-list li {
+      font-size: 13px;
+      color: var(--text);
+      padding: 6px 0;
+      display: flex;
+      gap: 10px;
+    }
+    .wwd-card.dark .wwd-list li { color: rgba(255,255,255,.8); }
+    .wwd-list li::before { content: '—'; color: var(--accent); font-size: 10px; margin-top: 5px; min-width: 10px; }
+
+    /* ===== Process ===== */
+    .process-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin-top: 48px;
+      position: relative;
+    }
+    .process-steps::before {
+      content: '';
+      position: absolute;
+      left: 28px;
+      top: 28px;
+      bottom: 28px;
+      width: 1px;
+      background: linear-gradient(to bottom, var(--purple), transparent);
+      opacity: .25;
+    }
+    .step {
+      display: flex;
+      gap: 28px;
+      padding: 24px 0;
+      align-items: flex-start;
+    }
+    .step-num {
+      width: 56px;
+      min-width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      border: 1.5px solid var(--purple);
+      background: var(--white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--serif);
+      font-size: 18px;
+      color: var(--purple);
+      z-index: 1;
+    }
+    .step-content h3 { font-size: 16px; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
+    .step-content p { font-size: 13px; color: var(--light); line-height: 1.8; }
+    .step-tag {
+      display: inline-flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+    .step-tag span {
+      background: var(--purple-soft);
+      color: var(--purple);
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+
+    /* ===== For Who ===== */
+    .audience-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+      margin-top: 48px;
+    }
+    .aud-card {
+      padding: 36px 32px;
+      background: var(--white);
+      border: 1px solid var(--mid);
+    }
+    .aud-icon { font-size: 36px; margin-bottom: 16px; }
+    .aud-card h3 { font-size: 18px; font-weight: 600; color: var(--ink); margin-bottom: 10px; }
+    .aud-card .subtitle { font-size: 12px; color: var(--purple); letter-spacing: 1px; margin-bottom: 14px; }
+    .aud-card p { font-size: 13px; color: var(--light); line-height: 1.8; margin-bottom: 16px; }
+    .concern-list { list-style: none; }
+    .concern-list li {
+      font-size: 13px;
+      color: var(--text);
+      padding: 6px 0;
+      border-bottom: 1px solid var(--mid);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .concern-list li:last-child { border-bottom: none; }
+    .concern-list li::before { content: 'Q'; font-size: 10px; background: var(--mid); color: var(--light); padding: 1px 5px; border-radius: 3px; }
+
+    .aud-answer {
+      margin-top: 20px;
+      background: var(--purple-soft);
+      padding: 16px 18px;
+    }
+    .aud-answer p { font-size: 13px; color: var(--purple); line-height: 1.7; margin: 0; }
+    .aud-answer p strong { font-weight: 600; }
+
+    /* ===== Pricing ===== */
+    #pricing { background: var(--ink) !important; color: var(--white); }
+    #pricing h2 { color: var(--white); }
+    #pricing .section-label { color: var(--accent); }
+    #pricing .lead { color: rgba(255,255,255,.55); }
+
+    .pricing-main {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      margin-top: 48px;
+      align-items: start;
+    }
+    .pricing-card {
+      border: 1px solid rgba(255,255,255,.1);
+      padding: 44px 40px;
+      text-align: center;
+      background: rgba(255,255,255,.03);
+    }
+    .pricing-eyebrow {
+      font-size: 10px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 20px;
+    }
+    .pricing-amount {
+      font-family: var(--serif);
+      font-size: 68px;
+      color: var(--white);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .pricing-amount sup { font-size: 26px; vertical-align: super; }
+    .pricing-period {
+      font-size: 13px;
+      color: rgba(255,255,255,.4);
+      letter-spacing: 1px;
+      margin-bottom: 32px;
+    }
+    .pricing-includes { list-style: none; text-align: left; margin-bottom: 32px; }
+    .pricing-includes li {
+      font-size: 13px;
+      color: rgba(255,255,255,.75);
+      padding: 9px 0;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .pricing-includes li::before { content: '✓'; color: #a89ddf; font-size: 12px; margin-top: 2px; min-width: 14px; }
+    .pricing-note {
+      font-size: 11px;
+      color: rgba(255,255,255,.3);
+      line-height: 1.7;
+      border-top: 1px solid rgba(255,255,255,.07);
+      padding-top: 20px;
+      text-align: left;
+    }
+
+    .pricing-side {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .side-box {
+      border: 1px solid rgba(255,255,255,.08);
+      padding: 24px 26px;
+    }
+    .side-box h4 { font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
+    .side-box p { font-size: 13px; color: rgba(255,255,255,.55); line-height: 1.7; margin: 0; }
+    .side-box .amt { font-family: var(--serif); font-size: 32px; color: var(--white); margin: 6px 0; }
+
+    /* ===== Philosophy ===== */
+    .philosophy-quote {
+      border-left: 3px solid var(--purple);
+      padding: 24px 32px;
+      background: var(--purple-soft);
+      margin: 40px 0;
+    }
+    .philosophy-quote blockquote {
+      font-family: var(--serif);
+      font-size: 20px;
+      font-style: italic;
+      color: var(--ink);
+      line-height: 1.7;
+      margin-bottom: 10px;
+    }
+    .philosophy-quote cite { font-size: 12px; color: var(--light); }
+
+    .beliefs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-top: 40px;
+    }
+    .belief {
+      padding: 28px;
+      border: 1px solid var(--mid);
+      background: var(--white);
+    }
+    .belief .num {
+      font-family: var(--serif);
+      font-size: 44px;
+      color: var(--mid);
+      line-height: 1;
+      margin-bottom: 12px;
+    }
+    .belief h3 { font-size: 15px; font-weight: 600; color: var(--ink); margin-bottom: 8px; }
+    .belief p { font-size: 13px; color: var(--light); line-height: 1.7; }
+
+    /* ===== CTA ===== */
+    #cta {
+      background: linear-gradient(135deg, #1a1428 0%, #2e3a5c 100%) !important;
+      color: var(--white);
+      text-align: center;
+    }
+    #cta h2 { color: var(--white); margin-bottom: 20px; }
+    #cta .lead { color: rgba(255,255,255,.6); max-width: 520px; margin: 0 auto 40px; }
+    .cta-actions { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 32px;
+      font-size: 14px;
+      font-family: var(--sans);
+      letter-spacing: .5px;
+      cursor: pointer;
+      border: none;
+      text-decoration: none;
+      transition: all .2s;
+    }
+    .btn-primary { background: var(--accent); color: var(--ink); }
+    .btn-primary:hover { background: #d4b37e; }
+    .btn-outline { background: transparent; border: 1px solid rgba(255,255,255,.3); color: var(--white); }
+    .btn-outline:hover { border-color: rgba(255,255,255,.65); }
+
+    .contact-info {
+      margin-top: 56px;
+      padding-top: 40px;
+      border-top: 1px solid rgba(255,255,255,.08);
+      display: flex;
+      justify-content: center;
+      gap: 48px;
+      flex-wrap: wrap;
+    }
+    .contact-item { text-align: center; }
+    .contact-item .lbl { font-size: 10px; letter-spacing: 2px; color: rgba(255,255,255,.35); margin-bottom: 6px; }
+    .contact-item .val { font-size: 14px; color: rgba(255,255,255,.8); }
+
+    footer {
+      background: #0d0d0d;
+      color: rgba(255,255,255,.25);
+      padding: 36px;
+      text-align: center;
+      font-size: 12px;
+      letter-spacing: .5px;
+    }
+    footer span { color: var(--accent); }
+
+    @media (max-width: 768px) {
+      .container { padding: 0 24px; }
+      section { padding: 64px 0; }
+      .about-grid, .knowledge-intro, .what-we-do, .audience-grid,
+      .framework-grid, .beliefs, .pricing-main { grid-template-columns: 1fr; }
+      nav .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== COVER ===== -->
+<section id="cover">
+  <div class="cover-eyebrow">White Paper · 2026</div>
+  <h1 class="cover-title">SSR</h1>
+  <div class="cover-subtitle">交互数媒作品 · 创作咨询支持工作室</div>
+  <p class="cover-tagline">
+    我们相信每一位学生都有能力完成一件<strong>独立、完整、真实</strong>的交互数媒作品<br>
+    我们的工作，是陪伴这个过程发生
+  </p>
+  <div class="cover-badges">
+    <div class="cover-badge">¥10,000 / 项目</div>
+    <div class="cover-badge secondary">留学作品集 · 数字媒体创作</div>
+  </div>
+  <div class="scroll-hint">
+    <div class="line"></div>
+    <span>SCROLL</span>
+  </div>
+</section>
+
+<!-- ===== NAV ===== -->
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" href="#cover"><img src="assets/images/logo.jpg" alt="SSR Studio" style="height:32px;vertical-align:middle;margin-right:8px;border-radius:4px;"/><span class="nav-logo-text">SSR Studio</span></a>
+    <div class="nav-links">
+      <a href="#about">关于</a>
+      <a href="#knowledge">知识体系</a>
+      <a href="#what-we-do">我们做什么</a>
+      <a href="#process">合作流程</a>
+      <a href="#audience">适合谁</a>
+      <a href="#pricing">定价</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ===== ABOUT ===== -->
+<section id="about">
+  <div class="container">
+    <div class="section-label">关于工作室</div>
+    <h2>一个陪学生<br>做出真实作品的地方</h2>
+    <p class="lead">SSR 是一个专注于交互数媒领域的创作咨询支持工作室。我们不替学生创作，而是帮助他们建立真正属于自己的作品。</p>
+
+    <div class="about-grid">
+      <div class="about-text">
+        <p>
+          在数字媒体、交互设计、人机交互艺术等领域，越来越多的学生需要完成一件有分量的独立作品——用于留学申请的作品集。然而，大多数人面临的困境不是缺乏想法，而是<strong>不知道如何把一个模糊的感受转化成完整的创作</strong>。
+        </p>
+        <div class="highlight-box">
+          <p>SSR 工作室的存在，就是为了弥补这个空缺。我们以<strong>教练式陪伴</strong>为核心工作方式，通过一套完整的创作知识体系——<strong>数字媒体创作的底层逻辑</strong>——引导学生从零走到终稿。</p>
+        </div>
+        <p>
+          我们服务的对象是希望申请海外数字媒体、交互设计、新媒体艺术类院校的学生，以及希望孩子在这一方向获得专业支持的家长。每一个项目，我们都认真对待。
+        </p>
+        <div class="core-points">
+          <div class="core-point">
+            <div class="point-icon">教</div>
+            <div class="point-text">
+              <h4>教练式辅导，不是代做</h4>
+              <p>学生是作品的真正作者。我们的价值在于帮他们发现自己的创作逻辑，而不是提供一个现成的答案。</p>
+            </div>
+          </div>
+          <div class="core-point">
+            <div class="point-icon">完</div>
+            <div class="point-text">
+              <h4>独立、完整是最高标准</h4>
+              <p>我们追求的不是"过得去"，而是一件能代表学生真实能力、真实思考的作品——能在审查时站得住脚。</p>
+            </div>
+          </div>
+          <div class="core-point">
+            <div class="point-icon">体</div>
+            <div class="point-text">
+              <h4>知识体系为基础</h4>
+              <p>我们有一套自主研发的数字媒体创作方法论，它不是技法清单，而是让创作变得可理解、可执行的底层框架。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-block">
+        <div class="row">
+          <div class="info-item">
+            <div class="num">¥1万</div>
+            <div class="lbl">单项目起始定价</div>
+          </div>
+          <div class="info-item">
+            <div class="tag">交互数媒 · 人机交互艺术</div>
+            <div class="lbl" style="margin-top:8px">专注领域</div>
+          </div>
+          <div class="info-item">
+            <div class="num" style="font-size:28px;line-height:1.3;">留学<br>作品集</div>
+            <div class="lbl">核心应用场景</div>
+          </div>
+          <div class="info-item">
+            <div class="tag" style="border-color:rgba(200,164,110,.4);color:var(--accent);">知识包系列 · 塞蒂亚出品</div>
+            <div class="lbl" style="margin-top:8px">自有创作知识体系</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== KNOWLEDGE SYSTEM ===== -->
+<section id="knowledge">
+  <div class="container">
+    <div class="section-label">知识体系</div>
+    <h2>数字媒体创作的<br>底层逻辑</h2>
+    <p class="lead">这不是一套技法教程，而是一套帮助你理解"创作是什么"的思维框架——SSR 工作室的一切辅导，都建立在这个基础之上。</p>
+
+    <div class="knowledge-intro">
+      <div class="knowledge-desc">
+        <div class="kb-tag">✦ 知识包系列 No.1 · 塞蒂亚的理想世界</div>
+        <h3>创作之前，先理解<br>数字媒体的本质</h3>
+        <p>
+          数字媒体创作跨越技术、艺术与叙事三个维度。很多学生在开始创作之前，既不清楚"交互"意味着什么，也无法说清楚自己想表达什么——结果往往是技术堆砌，而缺少作者的声音。
+        </p>
+        <p>
+          我们的知识体系从<strong>底层逻辑</strong>出发：媒介是什么，作者与观者的关系如何构建，一件交互作品如何才能既完整又真实。学生通过学习这套框架，能够在创作之前就建立清晰的意图，在创作中做出有意识的选择。
+        </p>
+        <p>
+          这套知识包是 SSR 工作室陪伴辅导的内容基础，也是评判一件数媒作品是否"完整"的参照标准。
+        </p>
+      </div>
+
+      <div class="knowledge-pillars">
+        <div class="kb-pillar">
+          <div class="kb-num">01</div>
+          <div class="kb-content">
+            <h4>媒介与表达的关系</h4>
+            <p>理解数字媒体不只是工具，而是一种表达语言——选择什么媒介，就是在选择如何说话。</p>
+          </div>
+        </div>
+        <div class="kb-pillar">
+          <div class="kb-num">02</div>
+          <div class="kb-content">
+            <h4>交互设计的叙事逻辑</h4>
+            <p>交互不等于功能，它是观者参与意义建构的方式。学会把"用户路径"和"叙事弧线"结合起来。</p>
+          </div>
+        </div>
+        <div class="kb-pillar">
+          <div class="kb-num">03</div>
+          <div class="kb-content">
+            <h4>作品的完整性标准</h4>
+            <p>什么叫"完整的作品"？从概念、原型、执行到表达，每个环节如何形成逻辑闭环。</p>
+          </div>
+        </div>
+        <div class="kb-pillar">
+          <div class="kb-num">04</div>
+          <div class="kb-content">
+            <h4>创作者的主体性建立</h4>
+            <p>引导学生找到"自己的问题意识"——作品的出发点必须是真实的，而非老师或市场给的命题。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="knowledge-framework">
+      <h3>辅导内容覆盖的核心维度</h3>
+      <div class="framework-grid">
+        <div class="fw-card">
+          <div class="fw-icon">💡</div>
+          <h4>概念阶段</h4>
+          <p>帮助学生发现和确定真实的创作议题</p>
+          <ul>
+            <li>问题意识的激活</li>
+            <li>兴趣与媒介的匹配</li>
+            <li>创作意图的语言化</li>
+          </ul>
+        </div>
+        <div class="fw-card">
+          <div class="fw-icon">🔧</div>
+          <h4>开发阶段</h4>
+          <p>从原型到作品，创作过程的方法支持</p>
+          <ul>
+            <li>原型搭建与迭代逻辑</li>
+            <li>技术选型的决策支持</li>
+            <li>内容与形式的整合</li>
+          </ul>
+        </div>
+        <div class="fw-card">
+          <div class="fw-icon">📎</div>
+          <h4>呈现阶段</h4>
+          <p>作品的叙述与作品集的组织</p>
+          <ul>
+            <li>作品陈述（Artist Statement）</li>
+            <li>过程文档的整理</li>
+            <li>作品集的叙事结构</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== WHAT WE DO ===== -->
+<section id="what-we-do">
+  <div class="container">
+    <div class="section-label">我们做什么</div>
+    <h2>一件完整的作品，<br>从想法到成品</h2>
+    <p class="lead">每一个 SSR 项目，都以学生完成一件独立的交互数媒作品为目标。我们的角色是教练，不是执笔人。</p>
+
+    <div class="what-we-do">
+      <div class="wwd-card dark">
+        <div class="wwd-label">核心服务</div>
+        <h3>交互数媒作品<br>创作陪伴辅导</h3>
+        <p>全程跟进一件交互数媒作品的诞生过程——从模糊的想法，到可以放入作品集的完整呈现。我们提供的不是"答案"，而是帮助学生想清楚、做出来的过程支持。</p>
+        <ul class="wwd-list">
+          <li>创作议题确定与深化</li>
+          <li>媒介与交互形式的方向讨论</li>
+          <li>原型阶段的结构性反馈</li>
+          <li>作品完整度的标准把控</li>
+          <li>作品陈述（Statement）的辅导</li>
+          <li>作品集叙事结构的梳理</li>
+        </ul>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:24px;">
+        <div class="wwd-card">
+          <div class="wwd-label">知识框架传授</div>
+          <h3>数字媒体创作<br>底层逻辑学习</h3>
+          <p>每位学生在辅导过程中都会接触到 SSR 的核心知识体系——这是创作思维的训练，不只是技法的传授。</p>
+          <ul class="wwd-list">
+            <li>结合学生项目的知识导入</li>
+            <li>每阶段的概念梳理与反馈</li>
+          </ul>
+        </div>
+
+        <div class="wwd-card">
+          <div class="wwd-label">成果方向</div>
+          <h3>可用于留学申请<br>的作品集作品</h3>
+          <p>最终成果是学生真正独立完成的作品——可用于数字媒体、交互设计、新媒体艺术类院校的申请作品集。</p>
+          <ul class="wwd-list">
+            <li>海外艺术/设计院校作品集标准</li>
+            <li>作者声音清晰、思路可追溯</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PROCESS ===== -->
+<section id="process">
+  <div class="container">
+    <div class="section-label">合作流程</div>
+    <h2>一件作品的诞生，<br>大概是这样走的</h2>
+    <p class="lead">每个项目因学生而异，以下是一个标准项目的大致路径。实际推进节奏会依据学生的状态和作品需求灵活调整。</p>
+
+    <div class="process-steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-content">
+          <h3>初步了解 · 看看合不合适</h3>
+          <p>我们会和学生（及家长）做一次深度沟通，了解学生的背景、兴趣方向、目标院校，以及目前的创作积累。这次对话的目的是判断我们能不能帮到这位同学，以及这个项目的重点在哪里。</p>
+          <div class="step-tag">
+            <span>在线沟通</span>
+            <span>双向了解</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-content">
+          <h3>议题激活 · 找到真实的起点</h3>
+          <p>很多学生来的时候没有明确想法，这是正常的。这个阶段我们会用一套方法帮学生发现真正感兴趣的问题，把模糊的感受转化成可以开始创作的"议题"。这是整个作品最核心的一步。</p>
+          <div class="step-tag">
+            <span>问题激活</span>
+            <span>媒介选择</span>
+            <span>意图明确化</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-content">
+          <h3>原型搭建 · 从想法变成东西</h3>
+          <p>学生开始动手做，我们在旁提供反馈和方向支持。这个阶段强调"先做出来"，原型不需要完美，但要有足够的诚意和完整性。我们会帮助学生在每次迭代中搞清楚为什么这样改，而不是照着改。</p>
+          <div class="step-tag">
+            <span>原型迭代</span>
+            <span>结构性反馈</span>
+            <span>技术支持</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">04</div>
+        <div class="step-content">
+          <h3>作品完成 · 做到"完整"为止</h3>
+          <p>根据 SSR 对"完整作品"的标准，帮学生逐项检查作品的完整度：概念是否清晰，交互是否有意图，形式与内容是否统一。这个阶段往往也是学生成长最快的时候。</p>
+          <div class="step-tag">
+            <span>完整度检查</span>
+            <span>概念与形式统一</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">05</div>
+        <div class="step-content">
+          <h3>表达与呈现 · 让作品开口说话</h3>
+          <p>作品做完不等于项目结束。我们会辅导学生完成 Artist Statement 的写作，梳理作品集中这件作品的叙事结构——让审查者能从作品本身感受到学生的思考深度。</p>
+          <div class="step-tag">
+            <span>Artist Statement</span>
+            <span>过程文档</span>
+            <span>作品集呈现</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== AUDIENCE ===== -->
+<section id="audience">
+  <div class="container">
+    <div class="section-label">适合谁</div>
+    <h2>这个项目，<br>是为你们准备的</h2>
+    <p class="lead">SSR 的项目主要面向两类人：想做出一件真实作品的学生，以及希望孩子被专业支持的家长。</p>
+
+    <div class="audience-grid">
+      <div class="aud-card">
+        <div class="aud-icon">🎓</div>
+        <h3>在读/应届学生</h3>
+        <div class="subtitle">STUDENT · 作品集方向</div>
+        <p>正在准备申请海外数字媒体、交互设计、新媒体艺术类院校，需要在作品集中呈现一件有分量的交互数媒作品。</p>
+        <ul class="concern-list">
+          <li>我有想法，但不知道怎么做成作品</li>
+          <li>我怕我的想法不够"专业"</li>
+          <li>我不确定我的技术能力够不够</li>
+          <li>我需要有人帮我把作品说清楚</li>
+        </ul>
+        <div class="aud-answer">
+          <p>这些担心我们都听到了。<strong>没有想法不是问题，我们帮你找；技术不够没关系，我们一起选合适的方向。</strong>我们需要的只是你的真实状态和愿意参与的意愿。</p>
+        </div>
+      </div>
+
+      <div class="aud-card">
+        <div class="aud-icon">👨‍👩‍👧</div>
+        <h3>学生家长</h3>
+        <div class="subtitle">PARENT · 结果导向</div>
+        <p>孩子有意向申请数字媒体相关专业，希望找到专业、可信任的创作辅导，在作品集这一关给予实质性支持。</p>
+        <ul class="concern-list">
+          <li>这笔钱花下去，孩子真的能有成果吗</li>
+          <li>是帮孩子做，还是真的教孩子做</li>
+          <li>学校审查会不会发现不是孩子自己做的</li>
+          <li>整个项目怎么推进，进度怎么把控</li>
+        </ul>
+        <div class="aud-answer">
+          <p>我们的立场很明确：<strong>孩子必须是作品真正的作者。</strong>我们的辅导方式和交付标准，经得起任何审查——这是我们对家长最重要的承诺。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PRICING ===== -->
+<section id="pricing">
+  <div class="container">
+    <div class="section-label">定价方案</div>
+    <h2>清晰定价，<br>一事一议</h2>
+    <p class="lead">我们不做套餐，不做打包销售。每个项目根据学生的实际情况单独确定范围和报价，起始价格为 ¥10,000。</p>
+
+    <div class="pricing-main">
+      <div class="pricing-card">
+        <div class="pricing-eyebrow">STANDARD PROJECT</div>
+        <div class="pricing-amount"><sup>¥</sup>10,000</div>
+        <div class="pricing-period">/ 单项目起始价 · 最终以实际方案为准</div>
+        <ul class="pricing-includes">
+          <li>全程创作陪伴辅导（议题→原型→完成→呈现）</li>
+          <li>SSR 创作知识体系的贯穿性教学</li>
+          <li>作品完整度把控与分阶段反馈</li>
+          <li>Artist Statement 写作辅导</li>
+          <li>作品集叙事结构梳理</li>
+          <li>阶段性进度对话（含家长沟通）</li>
+        </ul>
+        <p class="pricing-note">
+          最终报价取决于作品类型、复杂度和辅导周期。<br>
+          建议在初步沟通后确认具体方案与价格。付款方式：50% 启动 + 50% 完成交付。
+        </p>
+      </div>
+
+      <div class="pricing-side">
+        <div class="side-box">
+          <h4>项目周期</h4>
+          <div class="amt">6–12 周</div>
+          <p>根据学生目前创作积累与作品复杂度，周期有所不同。申请季前置时间越充裕越好。</p>
+        </div>
+        <div class="side-box">
+          <h4>成果标准</h4>
+          <p style="color:rgba(255,255,255,.75);font-size:14px;line-height:1.8;">
+            作品能够被学生独立介绍和展示；<br>
+            有清晰的创作意图和完整的实现；<br>
+            通过正规院校作品集审查。
+          </p>
+        </div>
+        <div class="side-box">
+          <h4>一件事我们不做</h4>
+          <p>我们不接受"代做"需求。如果学生不参与创作过程，这个项目就没有意义——对学生的未来也没有帮助。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PHILOSOPHY ===== -->
+<section id="philosophy">
+  <div class="container">
+    <div class="section-label">我们相信什么</div>
+    <h2>关于创作，<br>我们有一些笃定的看法</h2>
+
+    <div class="philosophy-quote">
+      <blockquote>"每一件真实的作品，都是创作者与世界之间真实的对话。我们的工作，是帮学生找到他想说的话，然后帮他说清楚。"</blockquote>
+      <cite>— SSR 工作室</cite>
+    </div>
+
+    <div class="beliefs">
+      <div class="belief">
+        <div class="num">01</div>
+        <h3>作品必须是学生自己的</h3>
+        <p>不是因为规定，而是因为只有这样的作品才有长期价值。进了学校之后，面对的是更难的问题——没有自己的创作能力，是撑不住的。</p>
+      </div>
+      <div class="belief">
+        <div class="num">02</div>
+        <h3>没有"不够好"的起点</h3>
+        <p>技术积累少、从没做过交互项目，这些都不是障碍。真正重要的是学生有没有真实的好奇心和愿意投入的态度。我们在这个基础上工作。</p>
+      </div>
+      <div class="belief">
+        <div class="num">03</div>
+        <h3>创作是可以被教的</h3>
+        <p>这是我们存在的前提。不是所有人天生就知道怎么把想法变成作品——但这个能力是可以通过正确的方法被激活和建立的。</p>
+      </div>
+      <div class="belief">
+        <div class="num">04</div>
+        <h3>¥10,000 是一个承诺</h3>
+        <p>这个定价意味着我们只接自己能认真对待的项目。我们不做流水线，每个项目都需要真实的投入。不合适的学生，我们会直说。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CTA ===== -->
+<section id="cta">
+  <div class="container">
+    <div class="section-label">开始合作</div>
+    <h2>聊聊你的孩子<br>或者你自己的想法</h2>
+    <p class="lead">
+      不需要已经有清晰的方向。你可以带着最模糊的想法来——我们来判断能不能一起推进，怎么推进。
+    </p>
+    <div class="cta-actions">
+      <a class="btn btn-primary" href="#">发起咨询 →</a>
+      <a class="btn btn-outline" href="#knowledge">了解知识体系</a>
+    </div>
+
+    <div class="contact-info">
+      <div class="contact-item">
+        <div class="lbl">工作室</div>
+        <div class="val">SSR Studio</div>
+      </div>
+      <div class="contact-item">
+        <div class="lbl">定价起始</div>
+        <div class="val">¥10,000 / 项目</div>
+      </div>
+      <div class="contact-item">
+        <div class="lbl">合作方式</div>
+        <div class="val">远程 · 项目制</div>
+      </div>
+      <div class="contact-item">
+        <div class="lbl">响应时间</div>
+        <div class="val">工作日 24h 内回复</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  <p>© 2026 <span>SSR 工作室</span> · 交互数媒作品 · 创作咨询支持 · 所有权利保留</p>
+</footer>
+
+</body>
+</html>
